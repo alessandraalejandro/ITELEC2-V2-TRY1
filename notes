@@ -1,0 +1,111 @@
+> CREATE A DATABASE IN XAMPP\MYSQL\PHPADMIN
+>> create a new database in localhost/phpamdin
+>> enter the name "itelec2"
+
+
+
+> CREATE A NEW REPOSITORY IN GTIHUB DESKTOP
+>> signin in github desktop
+>> create new repository, name it "ITELEC2-V2"
+>> make sure that the repository is public
+>> then publish it
+>> open the repository in Visual Studio Code
+
+
+
+> ADD FOLDERS IN THE VSCODE
+v ITELEC2-V2
+    > config
+       settings-configuration.php
+
+    > dashboard
+        >> admin
+            >>> authentication
+                admin-class.php
+        > user
+
+    > database
+        dbconnection.php
+
+    > src
+        >> css
+        >> js
+        >> img
+
+    .gitattributes
+    index.php
+
+
+
+> CODING IN file:dbconnection.php
+>> using an OOP approach, for clean codes
+
+<?php
+
+class Database 
+{
+    // private, it can only be accessed in this class and file.
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
+
+    // public, it can be used all over the codes.
+    public $conn;
+
+    public function __construct()       // Constructs a server connnection
+    {
+         
+        //  the database can neither be a localhost or a live server, in case it is needed to be uploaded
+
+        // it calls the server that you are using through your machine. This are the 3 options for the local server, any one of this can connect our database to our loacl server.
+        if ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_ADDR'] === '127.0.0.1' || $_SERVER['SERVER_ADDR'] === '192.168.1.72'){
+
+
+            // this is the oop approach of declaring a variable
+            $this->host = "localhost";
+            $this->db_name = "itelec2-try1";
+            $this->username = "root";
+            $this->password = "";
+
+        }
+
+        // we can edit our site in our local machine while the database is in a web host server
+        // this is for when it detect that we are at a web host server
+        else{
+            $this->host = "";
+            $this->db_name = "";
+            $this->username = "";
+            $this->password = "";
+
+        }
+
+    }   
+
+    public funciton dbConnection()
+    {
+
+        $this->conn = null;
+        try {
+
+            // mysqli is prone to SQL injection compared to PDO which is more secured.
+            $this->conn = new PDO("mysql:host=". $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
+            //attributes - 
+            $this->conn->setAttributes(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        } catch (PDOException $exception)      // for catching errors in db connection
+        {
+            echo "Connection Error: " . $exception->getMessage();
+        }
+
+        return $this->conn;
+
+    }
+
+}
+
+?>
+
+
+
+> GO TO index.php
