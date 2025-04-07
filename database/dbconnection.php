@@ -10,10 +10,9 @@ class Database {
 
     public function __construct(){
 
-        if($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_ADDR'] === '127.0.0.1' || $_SERVER['SERVER_ADDR'] === '192.168.1.72'){
-            
+        if($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_ADDR'] === '127.0.0.1' || $_SERVER['SERVER_ADDR'] === '192.168.1.72' ||  $_SERVER['SERVER_ADDR'] === '127.0.0.1:3307' ){
             $this->host = 'localhost';
-            $this->db_name = 'itelec2-try1';
+            $this->db_name = 'itelec2-try';
             $this->username = 'root';
             $this->password = '';
 
@@ -21,9 +20,10 @@ class Database {
 
         else{
             $this->host = 'localhost';
-            $this->db_name = 'itelec2-try1';
-            $this->username = 'root';
+            $this->db_name = '';
+            $this->username = '';
             $this->password = '';
+
         }
         
 
@@ -37,7 +37,7 @@ class Database {
             $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch(PDOException $exception){
-            echo "Connectiom Error: " . $exception->getMessage();
+            echo "Connection Error: " . $exception->getMessage();
         }
 
         return $this->conn;

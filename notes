@@ -109,3 +109,188 @@ class Database
 
 
 > GO TO index.php
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <h1>SIGN IN</h1>
+    <form action="" method="POST">
+        <input type="hidden" name="csrf_token" value="">
+    
+    </form>
+
+    <h1>REGISTRATION</h1>
+    <form action="" method="post">
+    
+    </form>
+
+</body>
+</html>
+
+
+
+> GO TO settings-configuration.php
+<?php
+
+session_start();
+
+// Error Reporting
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// CSRF (Cross Site Request Forgery) TOKEN
+if(empty($_SESSION['csrf_token'])){
+    $csrf_token = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] = $csrf_token;
+}else{
+    $csrf_token = $_SESSION['csrf_token'];
+}
+
+?>
+
+
+
+> GO TO index.php
+>> add this before the <!DOCTYPE html>
+
+<?php
+    include_once 'config/settings-configuration.php';
+?>
+
+>> in the sign in form add this in the input csrf_token
+
+<input type="hidden" name="csrf_token" value="<?php echo $csrf_token ?>">
+
+>> then create input fields for sign in form, below the csrf_token input
+<input type="email" name="email" placeholder="Enter Email" required><br>
+<input type="password" name="password" placeholder="Enter Password" required><br>
+<button type="submit" name="btn-signin">Sign in</button>
+
+>> add this in the registration form
+<input type="hidden" name="csrf_token" value="<?php echo $csrf_token ?>">
+<input type="text" name="username" placeholder="Enter Username" required><br>
+<input type="email" name="email" placeholder="Enter Email" required><br>
+<input type="password" name="password" placeholder="Enter Password" required><br>
+<button type="submit" name="btn-signup">SIGN UP</button>
+
+
+
+> GO TO http://localhost/phpmyadmin/ or click the admin button in localhost XAMPP
+>> select the database
+>> go to SQL
+>> enter the query below
+CREATE TABLE `user`(
+    id INT AUTO_INCREMENT PRIMARY KEY NULL,
+    username VARCHAR(50) DEFAULT NULL, 
+    email VARCHAR(50) DEFAULT NULL,
+    password VARCHAR(400) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+> click Go
+> click new under the database name
+> go to SQL again, and write the query below
+CREATE TABLE `logs`(
+    id INT(14) AUTO_INCREMENT PRIMARY KEY,
+    user_id INT(14) NOT NULL,
+    activity VARCHAR(50) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(id)
+);
+> click Go
+
+
+
+GO TO admin-class.php
+<?php
+
+require_once __DIR__ '/../../../database/dbconnection.php';
+include_once __DIR__ '/../../../config/settings-configuration.php';
+
+class ADMIN{
+    private $conn; // for the database connection
+    public function __construct(){ 
+        $database = new Database(); // Database is the name od the class in dbconnection.php
+        $this->conn = $database->dbConnection();    // this accesses the dbConnection function in the Database class for connecting the database to the system
+    }
+
+    public function addAdmin($csrf_token, $username, $email, $password){
+
+        // checks if the email already exists in the database, to prevent duplicattion
+        $this->conn = $database->dbConnection();
+
+    }
+
+    public function adminSignin($email, $password, $csrf_token){
+
+        $stmt = $this->conn->prepare("SELECT * FROM user WHERE email = :email");
+        $stmt->execute(array(":email" => $email));
+        
+        // if the row count has existing email, it will show an error
+        // it will check if the user email is existing
+        if($stmt->rowCount() > 0){
+            echo "<script>alert('Email already exists.) window.location.href = '../../../';</script>"
+            exit;
+        }
+        
+        // verify csrf first, before executing the insert into database
+        if (isset($csrf_token) || !hash_equals($_SESSION['csrf_token'], $csrf_token)){
+            echo "<script>alert('Invalid CSRF Token.); window.location/href = '../../../'; </script>";
+            exit;
+        }
+
+        // to regenerate csrf token
+        unset($_SESSION['csrf_token']);
+        
+        $hash_password = password_hash($password, PASSWORD_DEFAULT);
+
+        $stmt = $this->runQuery('INSERT INTO user (username, email, password) VALUES (:username, :email, :password)');
+        $exec = $stmt->execute(array(
+            ":username" => $username,
+            ":email" => $email,
+            ":password" => $hash_password
+        ));
+
+        if($exec){
+            echo "<script>alert('Admin Added Successfully.); window.location/href = '../../../'; </script>";
+            exit;
+        }else{
+            echo "<script>alert('Invalid CSRF Token.); window.location/href = '../../../'; </script>";
+            exit;
+        }
+        
+    }
+
+    public function adminSignout(){
+
+    }
+
+    public function logs($activty, $user_id){
+
+    }
+
+    public function runQuery($sql){
+        $stmt = $this->conn->prepare($sql);
+        return $stmt;
+    }
+}
+
+if (isset($_POST['btn-signup'])){
+    // gives access to the input of the user from the input fields in the Sign Up form 
+    $csrf_token = trim($_POST['csrf_token']);
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+
+    $addAdmin = new ADMIN();
+    $addAdmin->addAdmin($csrf_token, $username, $email, $password);
+}
+
+?>
