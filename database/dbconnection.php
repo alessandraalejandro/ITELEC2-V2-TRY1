@@ -6,6 +6,7 @@ class Database {
     private $db_name;
     private $username;
     private $password;
+    private $port; // add for changed ports
     public $conn;
 
     public function __construct(){
@@ -13,7 +14,8 @@ class Database {
         if($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_ADDR'] === '127.0.0.1' || $_SERVER['SERVER_ADDR'] === '192.168.1.72' ||  $_SERVER['SERVER_ADDR'] === '127.0.0.1:3307' ){
             $this->host = 'localhost';
             $this->db_name = 'itelec2-try';
-            $this->username = 'root';
+            $this->port = '3307'; // add this for changed ports (from 3306 to 3307)
+            $this->username = 'root'; 
             $this->password = '';
 
         }
@@ -34,7 +36,7 @@ class Database {
         $this->conn = null;
 
         try{
-            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
+            $this->conn = new PDO("mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name, $this->username, $this->password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch(PDOException $exception){
             echo "Connection Error: " . $exception->getMessage();

@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 require_once __DIR__.'/../../../database/dbconnection.php';
 include_once __DIR__.'/../../../config/settings-configuration.php';
 
@@ -19,14 +21,14 @@ class ADMIN{
         
         // if the row count has existing email, it will show an error
         // it will check if the user email is existing
-        if($stmt->rowCount() > 0){
-            echo "<script>alert('Email already exists.') window.location.href = '../../../';</script>";
+        if($stmt->rowCount() > 0){ // counts the number of rows 
+            echo "<script>alert('Email already exists.'); window.location.href = '../../../';</script>";
             exit;
         }
         
         // verify csrf first, before executing the insert into database
         if (!isset($csrf_token) || !hash_equals($_SESSION['csrf_token'], $csrf_token)){
-            echo "<script>alert('Invalid CSRF Token.'); window.location/href = '../../../'; </script>";
+            echo "<script>alert('Invalid CSRF Token.'); window.location.href = '../../../'; </script>";
             exit;
         }
 
@@ -44,10 +46,10 @@ class ADMIN{
         ));
 
         if($exec){
-            echo "<script>alert('Admin Added Successfully.); window.location/href = '../../../'; </script>";
+            echo "<script>alert('Admin Added Successfully.'); window.location.href = '../../../index.php';</script>";
             exit;
         }else{
-            echo "<script>alert('Invalid CSRF Token.); window.location/href = '../../../'; </script>";
+            echo "<script>alert('Invalid CSRF Token.'); window.location.href = '../../../index.php';</script>";
             exit;
         }
 
@@ -56,7 +58,7 @@ class ADMIN{
     public function adminSignin($email, $password, $csrf_token){
         try{
             if (!isset($csrf_token) || !hash_equals($_SESSION['csrf_token'], $csrf_token)){
-                echo "<script>alert('Invalid CSRF Token.'); window.location/href = '../../../'; </script>";
+                echo "<script>alert('Invalid CSRF Token.'); window.location.href = '../../../index.php';</script>";
                 exit;
             }
             unset($_SESSION['csrf_token']);
@@ -65,16 +67,16 @@ class ADMIN{
             $stmt->execute(array(":email" => $email));
             $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if($stmt->rowCount() == 1 && $userRow['password'] == md5[$password]){
+            if($stmt->rowCount() == 1 && $userRow['password'] == md5($password)){
                 $activty = "Has Successfully Signed In";
                 $user_id = $userRow['id'];
                 $this->logs($activity, $user_id);
 
                 $_SESSION['adminSession'] = $user_id;
-                echo "<script>alert('Welcome.'); window.location/href = '../'; </script>";
+                echo "<script>alert('Welcome.'); window.location.href = '../index.php';</script>";
                 exit;
             }else{
-                echo "<script>alert('Invalid Credentials.'); window.location/href = '../../../'; </script>";
+                echo "<script>alert('Invalid Credentials.'); window.location.href = '../../../index.php';</script>";
                 exit;
             }
 
@@ -88,7 +90,7 @@ class ADMIN{
 
     public function adminSignout(){
         unset($_SESSION['adminSession']);
-        echo "<script>alert('Sign Out Successfully.'); window.location/href = '../../../'; </script>";
+        echo "<script>alert('Sign Out Successfully.'); window.location.href = '../../../index.php';</script>";
         exit;
     }
 
@@ -105,7 +107,7 @@ class ADMIN{
     }
 
     public function redirect(){
-        echo "<script>alert('Admin must log in first.'); window.location/href = '../../../'; </script>";
+        echo "<script>alert('Admin must log in first.'); window.location.href = '../../../index.php';</script>";
         exit;
     }
 
@@ -137,7 +139,7 @@ if(isset($_POST['btn-signin'])){
     $adminSignin->adminSignin($email, $password, $csrf_token);
 }
 
-if(isset($_GET['admin_signout']){
+if(isset($_GET['admin_signout'])){
     $adminSignout = new ADMIN();
     $adminSignout->adminSignout();
 }

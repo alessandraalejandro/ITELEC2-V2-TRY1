@@ -24,6 +24,6 @@ $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
 </head>
 <body>
     <h1>WELCOME <?php echo $user_data['email'] ?> </h1>
-    <button><a href="authentication/admin-class.php?admin_signout"></a></button>
+    <button><a href="authentication/admin-class.php?admin_signout">SIGN OUT</a></button>
 </body>
 </html>
