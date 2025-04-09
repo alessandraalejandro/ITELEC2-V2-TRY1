@@ -1,15 +1,16 @@
 <?php
 
-require_once 'authentication/admin-class.php'; // require_once: is used to embed php code from another file. If not found a fatal error is thrown and the system stops. if the file is already included it will not include again.
+require_once 'authentication/admin-class.php'; 
+// require_once: is used to embed php code from another file. If not found a fatal error is thrown and the system stops. if the file is already included it will not include again.
 
 $admin = new ADMIN();
-if(!$admin->isUserLoggedIn()){
+if(!$admin->isUserLoggedIn()){ // the user will be redirected to the sign in page, if the user is not logged in.
     $admin->redirect('../../');
 }
 
 $stmt = $admin->runQuery("SELECT * FROM user WHERE id = :id");
-$stmt->execute(array(":id" => $_SESSION['adminSession']));
-$user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+$stmt->execute(array(":id" => $_SESSION['adminSession'])); // uses the stored information inside the session
+$user_data = $stmt->fetch(PDO::FETCH_ASSOC); // returns a single row from the database based on the query
 
 ?>
 

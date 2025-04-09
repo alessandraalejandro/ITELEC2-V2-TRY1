@@ -15,6 +15,9 @@ class ADMIN{
         $this->conn = $database->dbConnection();    // this accesses the dbConnection function in the Database class for connecting the database to the system
     }
 
+
+
+    // Sign up or Register function
     public function addAdmin($csrf_token, $username, $email, $password){
 
         // checks if the email already exists in the database, to prevent duplicattion
@@ -40,6 +43,7 @@ class ADMIN{
         //$hash_password = password_hash($password, PASSWORD_DEFAULT);
         $hash_password = md5($password);
 
+        // uses the runQuery function to insert the values into the database
         $stmt = $this->runQuery('INSERT INTO user (username, email, password) VALUES (:username, :email, :password)');
         $exec = $stmt->execute(array(
             ":username" => $username,
@@ -57,6 +61,9 @@ class ADMIN{
 
     }
 
+
+
+    // Sign in function
     public function adminSignin($email, $password, $csrf_token){
         try{
             if(!isset($csrf_token) || !hash_equals($_SESSION['csrf_token'], $csrf_token)){
@@ -74,7 +81,7 @@ class ADMIN{
                 $user_id = $userRow['id'];
                 $this->logs($activity, $user_id);
 
-                $_SESSION['adminSession'] = $user_id;
+                $_SESSION['adminSession'] = $user_id; // stores the user_id value in session
                 echo "<script>alert('Welcome.'); window.location.href = '../';</script>";
                 exit;
             }else{
@@ -90,16 +97,22 @@ class ADMIN{
         
     }
 
+
+
     public function adminSignout(){
-        unset($_SESSION['adminSession']);
+        unset($_SESSION['adminSession']); // used to remove a specific session variable from the session. it unregisters the session variable.
         echo "<script>alert('Sign Out Successfully.'); window.location.href = '../../../';</script>";
         exit;
     }
+
+
 
     public function logs($activity, $user_id){
         $stmt = $this->conn->prepare("INSERT INTO logs (user_id, activity) VALUES (:user_id, :activity)");
         $stmt->execute(array(":user_id" => $user_id, ":activity" => $activity));
     }
+
+
 
     public function isUserLoggedIn(){
 
@@ -109,11 +122,16 @@ class ADMIN{
 
     }
 
+
+
     public function redirect(){
         echo "<script>alert('Admin must log in first.'); window.location.href = '../../../';</script>";
         exit;
     }
 
+
+
+    // prepares the querys for execution 
     public function runQuery($sql){
         $stmt = $this->conn->prepare($sql);
         return $stmt;
@@ -122,6 +140,7 @@ class ADMIN{
 
 
 
+// handles the submission forms. It processes data from an HTML form
 if (isset($_POST['btn-signup'])){
     // gives access to the input of the user from the input fields in the Sign Up form 
     $csrf_token = trim($_POST['csrf_token']);
@@ -133,6 +152,7 @@ if (isset($_POST['btn-signup'])){
     $addAdmin->addAdmin($csrf_token, $username, $email, $password);
 }
 
+// $_POST - Contains data sent to the script via on HTML form using the POST method
 if(isset($_POST['btn-signin'])){
     $csrf_token = trim($_POST['csrf_token']);
     $email = trim($_POST['email']);
@@ -142,6 +162,7 @@ if(isset($_POST['btn-signin'])){
     $adminSignin->adminSignin($email, $password, $csrf_token);
 }
 
+// $_GET - Contains data sent to the script via URL
 if(isset($_GET['admin_signout'])){
     $adminSignout = new ADMIN();
     $adminSignout->adminSignout();
