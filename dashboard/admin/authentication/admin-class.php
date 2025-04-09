@@ -1,7 +1,11 @@
 <?php
 
-require_once __DIR__.'/../../../database/dbconnection.php';
-include_once __DIR__.'/../../../config/settings-configuration.php';
+require_once __DIR__.'/../../../database/dbconnection.php';  // require_once: is used to embed php code from another file. Throws a fatal error and the system stops. the file is only included(require once).
+include_once __DIR__.'/../../../config/settings-configuration.php'; // include_once: used to embed php code from another file. If te file is not found, a warning is shown and the program continues to run. if the file was already included previously, this statement will not include it again.
+
+// the __DIR__ will "hardwire" the absolute path
+// a relative path specifies the location of a file or directory relative to the current working directory. it uses . (current directory) and .. (parent directory) to navigate the file system
+// an absolute path starts from the root, and it provides a complete and unambiguous location, regardless of the current working directory.
 
 class ADMIN{
 
@@ -44,10 +48,10 @@ class ADMIN{
         ));
 
         if($exec){
-            echo "<script>alert('Admin Added Successfully.'); window.location.href = '../../../index.php';</script>";
+            echo "<script>alert('Admin Added Successfully.'); window.location.href = '../../../';</script>";
             exit;
         }else{
-            echo "<script>alert('Invalid CSRF Token.'); window.location.href = '../../../index.php';</script>";
+            echo "<script>alert('Invalid CSRF Token.'); window.location.href = '../../../';</script>";
             exit;
         }
 
@@ -55,8 +59,8 @@ class ADMIN{
 
     public function adminSignin($email, $password, $csrf_token){
         try{
-            if (!isset($csrf_token) || !hash_equals($_SESSION['csrf_token'], $csrf_token)){
-                echo "<script>alert('Invalid CSRF Token.'); window.location.href = '../../../index.php';</script>";
+            if(!isset($csrf_token) || !hash_equals($_SESSION['csrf_token'], $csrf_token)){
+                echo "<script>alert('Invalid CSRF Token.'); window.location.href = '../../../';</script>";
                 exit;
             }
             unset($_SESSION['csrf_token']);
@@ -66,15 +70,15 @@ class ADMIN{
             $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if($stmt->rowCount() == 1 && $userRow['password'] == md5($password)){
-                $activty = "Has Successfully Signed In";
+                $activity = "Has Successfully Signed In";
                 $user_id = $userRow['id'];
                 $this->logs($activity, $user_id);
 
                 $_SESSION['adminSession'] = $user_id;
-                echo "<script>alert('Welcome.'); window.location.href = '../index.php';</script>";
+                echo "<script>alert('Welcome.'); window.location.href = '../';</script>";
                 exit;
             }else{
-                echo "<script>alert('Invalid Credentials.'); window.location.href = '../../../index.php';</script>";
+                echo "<script>alert('Invalid Credentials.'); window.location.href = '../../../';</script>";
                 exit;
             }
 
@@ -88,11 +92,11 @@ class ADMIN{
 
     public function adminSignout(){
         unset($_SESSION['adminSession']);
-        echo "<script>alert('Sign Out Successfully.'); window.location.href = '../../../index.php';</script>";
+        echo "<script>alert('Sign Out Successfully.'); window.location.href = '../../../';</script>";
         exit;
     }
 
-    public function logs($activty, $user_id){
+    public function logs($activity, $user_id){
         $stmt = $this->conn->prepare("INSERT INTO logs (user_id, activity) VALUES (:user_id, :activity)");
         $stmt->execute(array(":user_id" => $user_id, ":activity" => $activity));
     }
@@ -102,10 +106,11 @@ class ADMIN{
         if(isset($_SESSION['adminSession'])){
             return true;
         }
+
     }
 
     public function redirect(){
-        echo "<script>alert('Admin must log in first.'); window.location.href = '../../../index.php';</script>";
+        echo "<script>alert('Admin must log in first.'); window.location.href = '../../../';</script>";
         exit;
     }
 

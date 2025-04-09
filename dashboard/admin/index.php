@@ -1,11 +1,10 @@
 <?php
 
-require_once 'authentication/admin-class.php';
+require_once 'authentication/admin-class.php'; // require_once: is used to embed php code from another file. If not found a fatal error is thrown and the system stops. if the file is already included it will not include again.
 
 $admin = new ADMIN();
 if(!$admin->isUserLoggedIn()){
     $admin->redirect('../../');
-
 }
 
 $stmt = $admin->runQuery("SELECT * FROM user WHERE id = :id");
